@@ -76,5 +76,6 @@ NS_INLINE BOOL InRange(SRange r, NSInteger i){
 
 - (id)dequeueReusableCellWithIdentifier:(NSString *)identifier;
 
+- (void)reloadData;
 
 @end

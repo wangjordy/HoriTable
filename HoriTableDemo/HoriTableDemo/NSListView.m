@@ -117,6 +117,10 @@
     int index = visibleRange.start;
     CGFloat left = 0;
     while (left <= rect.size.width) {
+        
+        if (index >= columRects.count) {
+            break;
+        }
         CGRect frame = CGRectFromString([columRects objectAtIndex:index]);
         [self requestCellWithIndex:index direction:NSDirectionTypeLeft];
         left += frame.size.width;
@@ -128,6 +132,85 @@
     
     visibleRange.end = index;
     
+    
+}
+
+
+- (void)reloadData
+{
+
+    //重新去加载start与end的
+    if (!visibleListCells) {
+        visibleListCells = [[NSMutableArray alloc] initWithCapacity:5];
+    }
+    
+    [visibleListCells removeAllObjects];
+    
+    if (reuseableListCells) {
+        [reuseableListCells removeAllObjects];
+        [reuseableListCells release];
+        reuseableListCells = nil;
+    }
+    
+    for (UIView *subView in rootScrollView.subviews) {
+        if ([subView isKindOfClass:[NSListCell class]]) {
+            [subView removeFromSuperview];
+        }
+    }
+    
+    if (dataSource && [dataSource respondsToSelector:@selector(numberOfColumnsInListView:)]) {
+        
+        NSInteger theColumns = [dataSource numberOfColumnsInListView:self];
+        if (theColumns <= 0) {
+            return;
+        }
+        
+        visibleRange = SRangeMake(0, 0);
+        columns = theColumns;
+        
+        if (columRects == nil) {
+            columRects = [[NSMutableArray alloc] initWithCapacity:columns];
+        }
+        [columRects removeAllObjects];
+        
+        CGFloat left = 0; //临时变量，记录每个cell的x坐标
+        for (int index=0; index < columns; index++) {
+            CGFloat width = height;
+            
+            if (dataSource &&[dataSource respondsToSelector:@selector(widthForColumnAtIndex:)]) {
+                width = [dataSource widthForColumnAtIndex:index];
+            }
+            
+            CGRect rect = CGRectMake(left, 0, width, height);
+            
+            [columRects addObject:NSStringFromCGRect(rect)];
+            left += width;
+        }
+        
+        rootScrollView.contentSize = CGSizeMake(left, height);
+    }
+
+    CGRect rect = [rootScrollView visibleRect];  //可以看见区域
+    
+    //以上是设置cell的frame还没有具体的加载cell到scrollView上
+    int index = visibleRange.start;
+    CGFloat left = 0;
+    while (left <= rect.size.width) {
+        
+        if (index >= columRects.count) {
+            break;
+        }
+        CGRect frame = CGRectFromString([columRects objectAtIndex:index]);
+        [self requestCellWithIndex:index direction:NSDirectionTypeLeft];
+        left += frame.size.width;
+        
+        if (left <= rect.size.width) {
+            index ++;
+        }
+    }
+    
+    visibleRange.end = index;
+    [rootScrollView setContentOffset:CGPointMake(0, 0) animated:YES];
     
 }
 
@@ -271,11 +354,14 @@
 #pragma mark ScrollView Delegate
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
+
     CGRect tempRect = [scrollView visibleRect];
+    
     CGFloat offsetX = tempRect.origin.x - visibleRect.origin.x;
     visibleRect = tempRect;
     //重新设置子视图的offsetX向右滚动(手势向左)offsetX>0,
     [self reLayoutSubViewsWithOffset:offsetX];
+    
 }
 
 #pragma mark -

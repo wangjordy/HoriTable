@@ -11,26 +11,38 @@
 #import "NSListCell.h"
 
 @interface ViewController () <NSListViewDelegate,NSListViewDataSource>
-
+{
+    NSArray *infoArray;
+    NSListView *rootListView;
+}
+@property (nonatomic, retain) NSArray *infoArray;
 @end
 
 @implementation ViewController
+@synthesize infoArray;
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
-    NSListView *listView = [[NSListView alloc] initWithFrame:CGRectMake(0, 200, 320, 100)];
-    [listView setDelegate:self];
-    [listView setDataSource:self];
-    [listView setBackgroundColor:[UIColor yellowColor]];
-    [self.view addSubview:listView];
-    [listView release];
+    
+    self.infoArray = [NSArray arrayWithObjects:@"Jordy", @"Jo", @"Jor", @"Jord", @"Jim", @"Beijing", @"TheValue", @"The", @"vam",nil];
+    
+    rootListView = [[NSListView alloc] initWithFrame:CGRectMake(0, 200, 320, 100)];
+    [rootListView setDelegate:self];
+    [rootListView setDataSource:self];
+    [rootListView setBackgroundColor:[UIColor yellowColor]];
+    [self.view addSubview:rootListView];
+    [rootListView release];
+    
+    
+    
+    
 }
 
 - (NSInteger)numberOfColumnsInListView:(NSListView *)listView
 {
-    return 10;
+    return [self.infoArray count];
 }
 
 - (NSListCell *)listView:(NSListView *)listView viewForColumnAtIndex:(NSInteger)index
@@ -43,8 +55,9 @@
     
     cell.alpha = 0.5;
     cell.backgroundColor = [UIColor yellowColor];
-    [cell.titleContentLabel setText:[NSString stringWithFormat:@"第%d行",index+1]];
-
+//    [cell.titleContentLabel setText:[NSString stringWithFormat:@"第%d行",index+1]];
+    
+    [cell.titleContentLabel setText:[self.infoArray objectAtIndex:index]];
     return cell;
 }
 
@@ -58,6 +71,11 @@
     return 100;
 }
 
+- (IBAction)onTestButtonClick:(id)sender
+{
+    self.infoArray = [NSArray arrayWithObjects:@"FU", @"MU",@"Beijing", @"TheValue", @"The", @"vam",nil];
+    [rootListView reloadData];
+}
 
 - (void)didReceiveMemoryWarning
 {
