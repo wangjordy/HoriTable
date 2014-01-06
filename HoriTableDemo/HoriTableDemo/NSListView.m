@@ -330,7 +330,7 @@
         //向右滑动--显示左侧的新cell
         
         //判断如果可见区域的最后一个移除区域外，则放进可复用池里面， 允许可复用
-        if (endFrame.origin.x >= (visibleRect.size.width) >= (endFrame.origin.x + endFrame.size.width)) {
+       if (endFrame.origin.x >= (visibleRect.origin.x + visibleRect.size.width)) {
             NSListCell *cell = (NSListCell *)[visibleListCells lastObject];
             [self inqueueReusableWithView:cell];
             end -= 1;
